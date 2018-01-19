@@ -268,26 +268,13 @@ def scan_coords():
 def ex_gym_data():
     return jsonify(get_ex_gyms())
 
-# MAY NOT NEED ANYMORE
-#@app.route('/ex_raid_data')
-#def ex_raid_data():
-#    raids = []
-#    for r in get_raid_markers():
-#        r['id'] = 'ex-' + r['id']
-#        for g in get_ex_gyms():
-#            gym_id = g['id']
-#            g['id'] = 'ex-raid-'+gym_id.strip('ex-fort-') # Convert ex_gym_id to raid_gym_id to compare
-#            if r['id'] == g['id']:
-#                raids.append(r)
-#    return jsonify(raids)
-
 @app.route('/parks')
 def parks():
     return jsonify(get_all_parks())
 
 @app.route('/cells')
 def cells():
-    return jsonify(get_s2_cells())
+    return jsonify(get_s2_cells(level=12))
 
 if conf.MAP_WORKERS:
     workers = Workers()

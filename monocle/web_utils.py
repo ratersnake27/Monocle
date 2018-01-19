@@ -150,6 +150,7 @@ def get_gym_markers(names=POKEMON):
         forts = get_forts(session)
     return [{
             'id': 'fort-' + str(fort['fort_id']),
+            'fort_id': fort['fort_id'],
             'sighting_id': fort['id'],
             'gym_name': fort['name'],
             'image_url': fort['image_url'],
@@ -171,6 +172,7 @@ def get_raid_markers(names=POKEMON, moves=MOVES):
     return [{
             'id': 'raid-' + str(raid['fort_id']),
             'raid_id': raid['id'],
+            'fort_id': raid['fort_id'],
             'gym_name': raid['name'],
             'image_url': raid['image_url'],
             'external_id': raid['external_id'],
@@ -261,10 +263,10 @@ def get_all_parks():
 
     return parks
 
-def get_s2_cells(level=12):
+def get_s2_cells(n=north, w=west, s=south, e=east, level=12):
     region_covered = s2sphere.LatLngRect.from_point_pair(
-        s2sphere.LatLng.from_degrees(north, west),
-        s2sphere.LatLng.from_degrees(south, east)
+        s2sphere.LatLng.from_degrees(n, w),
+        s2sphere.LatLng.from_degrees(s, e)
     )
     coverer = s2sphere.RegionCoverer()
     coverer.min_level = level
@@ -280,6 +282,10 @@ def get_s2_cells(level=12):
         })
     return markers
 
+def get_s2_cell_as_polygon(lat, lon, level=12):
+    cell = s2sphere.Cell(s2sphere.CellId.from_lat_lng(s2sphere.LatLng.from_degrees(lat, lon)).parent(level))
+    return [(get_vertex(cell, v)) for v in range(0, 4)]
+
 def get_ex_gyms():
     ex_gyms = []
     parks = get_all_parks()
@@ -288,21 +294,30 @@ def get_ex_gyms():
     except (FileNotFoundError, TypeError, KeyError):
         for g in get_gym_markers():
             g['id'] = 'ex-' + g['id']
+            gym_point = Point(g['lat'], g['lon'])
+            cell = Polygon(get_s2_cell_as_polygon(g['lat'], g['lon'], level=20)) # s2 lvl 20
             for p in parks:
                 coords = p['coords']
+                # osm polygon can be a line
                 if len(coords) == 2:
-                    if LineString(coords).within(Point(g['lat'], g['lon'])):
+                    shape = LineString(coords)
+                    if shape.within(gym_point) or cell.intersects(shape):
                         ex_gyms.append({
                             'id': g['id'],
                             'external_id': g['external_id'],
+                            'fort_id': g['fort_id'],
+                            'name': g['gym_name'],
                             'lat': g['lat'],
                             'lon': g['lon']
                         })
-                elif len(coords) > 2:
-                    if Polygon(coords).contains(Point(g['lat'], g['lon'])):
+                if len(coords) > 2:
+                    shape = Polygon(coords)
+                    if shape.contains(gym_point) or cell.intersects(shape):
                         ex_gyms.append({
                             'id': g['id'],
                             'external_id': g['external_id'],
+                            'fort_id': g['fort_id'],
+                            'name': g['gym_name'],
                             'lat': g['lat'],
                             'lon': g['lon']
                         })

@@ -257,6 +257,7 @@ var PokestopIcon = L.Icon.extend({
 });
 
 var markers = {};
+var ex_markers = {};
 if (_DisplaySpawnpointsLayer === 'True') {
     var overlays = {
         Pokemon_Gen1: L.markerClusterGroup({ disableClusteringAtZoom: 12 }),
@@ -765,14 +766,14 @@ function RaidMarker (raw) {
         var diff = (raid_marker.raw.raid_end - new Date().getTime() / 1000);
         var ex_raid_marker_id = "ex-" + raid_marker.raw.id;
         if ( (raid_marker.raw.id != undefined ) && ( diff < 0 ) ) { // Raid ended, remove markers
-            var expired_ex_marker = markers[ex_raid_marker_id];
+            var expired_ex_marker = ex_markers[ex_raid_marker_id];
             
             raid_marker.removeFrom(overlays.Raids);
             markers[raid_marker.raw.id] = undefined;
             
             if ( expired_ex_marker != undefined ) { // Raid ended, remove EX Eligible Raid markers
-                markers[ex_raid_marker_id].removeFrom(overlays.EX_Gyms); // TROUBLESHOOT THIS
-                markers[ex_raid_marker_id] = undefined;
+                ex_markers[ex_raid_marker_id].removeFrom(overlays.EX_Gyms);
+                ex_markers[ex_raid_marker_id] = undefined;
             }
             
             clearInterval(raid_marker.opacityInterval);
@@ -788,12 +789,13 @@ function ExGymMarker (raw) {
     var marker = L.marker([raw.lat, raw.lon], {icon: icon, opacity: 1, pane: 'sub_shadow'});
   
     marker.raw = raw;
-    markers[raw.id] = marker;
+    ex_markers[raw.id] = marker;
 
     marker.on('popupopen',function popupopen (event) {
         var content = ''
         content += '<div class="ex_gym_popup">';
-        content += 'This gym has been idenified as being an <br><b>EX Raid Eligible Gym</b>';
+        content += '<b>' + raw.name + ' Gym</b>';
+        content += '<br>has been idenified as being an <br>EX Raid Eligible Gym.';
         content += '<br><br><a href=https://www.google.com/maps/?daddr='+ raw.lat + ','+ raw.lon +' target="_blank" title="See in Google Maps">Get directions</a>';
         content += '</div>';
         event.popup.setContent(content);
@@ -807,17 +809,18 @@ function ExRaidMarker (raw) {
     var marker = L.marker([raw.lat, raw.lon], {icon: icon, opacity: 1, pane: 'at_shadow'});
   
     marker.raw = raw;
-    markers[raw.id] = marker;
+    ex_markers[raw.id] = marker;
   
     marker.on('popupopen',function popupopen (event) {
         var content = ''
         content += '<div class="ex_gym_popup">';
-        content += 'This raid has been idenified as being an <br><b>EX Raid Eligible Raid</b>';
+        content += 'The raid at the';
+        content += '<br><b>' + raw.gym_name + ' Gym</b><br>';
+        content += 'has been idenified as being an <br>EX Raid Eligible Raid';
         content += '<br><br><a href="#" data-action="display" class="ex_raid_popup_show_raids">Show Current Raids</a>';
         content += '&nbsp; | &nbsp;';
         content += '<a href="#" data-action="hide" class="ex_raid_popup_show_raids">Hide Current Raids</a>';
         content += '<br><br><a href=https://www.google.com/maps/?daddr='+ raw.lat + ','+ raw.lon +' target="_blank" title="See in Google Maps">Get directions</a>';
-        content += '<br>' + raw.id;
         content += '</div>';
         event.popup.setContent(content);
     });
@@ -947,25 +950,32 @@ function addRaidsToMap (data, map) {
         var levelPreference = getPreference('raid_filter-'+item.raid_level);
         var sponsorPreference = getPreference('sponsored_filter');
         var sponsor_type = getSponsorGymType(item);
-
         if ((levelPreference === 'hide_raid') || ((sponsor_type === 'non-sponsored') && (sponsorPreference === 'sponsored_only'))) {
             marker = RaidMarker(item);
             marker.addTo(hidden_overlays.FilteredRaids);
         } else {
             marker = RaidMarker(item);
             marker.addTo(overlays.Raids);
-        }
-        
-        // Check if raid was already added, if so, don't do anything
-        if (typeof existing !== 'undefined') {
-            return;
-        } else {
-            if ( markers[item.id.replace(/^raid-+/i, 'ex-fort-')] != undefined ) { // Check if raid is at an identified ex_gym
-                var ex_item = item;
-                ex_item.id = 'ex-'+ex_item.id;
-                ex_marker = ExRaidMarker(ex_item); // CREATE NEW MARKER FOR EX ELIGIBLES
-                ex_marker.addTo(overlays.EX_Gyms);
+
+            var ex_fort_id = 'ex-fort-' + item.fort_id;
+            var ex_item = {};
+
+            if (ex_markers[ex_fort_id])
+            {
+                ex_item.id = 'ex-raid-' + item.fort_id;
+                ex_item.fort_id = item.fort_id;
+                ex_item.gym_name = item.name;
+                ex_item.lat = item.lat;
+                ex_item.lon = item.lon;
+                
+                // If marker already exists don't do anything
+                if (ex_item.id in ex_markers) {
+                } else {
+                    ex_marker = ExRaidMarker(ex_item); // CREATE NEW MARKER FOR EX ELIGIBLES
+                    ex_marker.addTo(overlays.EX_Gyms);
+                }
             }
+
         }
     });
 }
@@ -1129,7 +1139,7 @@ function addCellsToMap (data, map) {
 function addExGymsToMap (data, map) {
     data.forEach(function (item) {
         // If marker already exists don't do anything
-        if (item.id in markers) {
+        if (item.id in ex_markers) {
             return;
         }
         marker = ExGymMarker(item); // CREATE NEW MARKER FOR EX ELIGIBLES
@@ -1137,18 +1147,29 @@ function addExGymsToMap (data, map) {
     });
 }
 
-/*
 function addExRaidsToMap (data, map) {
     data.forEach(function (item) {
-        // If marker already exists don't do anything
-        if (item.id in markers) {
-            return;
+        var raid_id = 'raid-' + item.fort_id;
+        var ex_item = {};
+
+        if (markers[raid_id])
+        {
+            ex_item.id = 'ex-raid-' + item.fort_id;
+            ex_item.fort_id = item.fort_id;
+            ex_item.gym_name = item.name;
+            ex_item.lat = item.lat;
+            ex_item.lon = item.lon;
+            
+            // If marker already exists don't do anything
+            if (ex_item.id in ex_markers) {
+            } else {
+                ex_marker = ExRaidMarker(ex_item); // CREATE NEW MARKER FOR EX ELIGIBLES
+                ex_marker.addTo(overlays.EX_Gyms);
+            }
         }
-        marker = ExRaidMarker(item); // CREATE NEW MARKER FOR EX ELIGIBLES
-        marker.addTo(overlays.EX_Gyms);
+
     });
 }
-*/
 
 function getPokemon () {
     if (overlays.Pokemon_Gen1.hidden && overlays.Pokemon_Gen2.hidden && overlays.Pokemon_Gen3.hidden && overlays.FilteredPokemon.hidden) {
@@ -1288,6 +1309,21 @@ function getExGyms() {
         });
     }).then(function (data) {
         addExGymsToMap(data, map);
+        //addExRaidsToMap(data, map);
+    });
+}
+
+function getExRaids() {
+    if (overlays.EX_Gyms.hidden) {
+        return;
+    }
+    new Promise(function (resolve, reject) {
+        $.get(_PoGoSDRegion+'/ex_gym_data', function (response) {
+            resolve(response);
+        });
+    }).then(function (data) {
+        //addExGymsToMap(data, map);
+        addExRaidsToMap(data, map);
     });
 }
 
@@ -1358,9 +1394,13 @@ map.whenReady(function () {
     getPokemon();
     getGyms();
     getRaids();
-    getCells();
-    getParks();
-    getExGyms();
+    overlays.Parks_In_S2_Cells.once('add', function(e) {
+        getCells();
+        getParks();
+    })
+//    overlays.EX_Gyms.once('add', function(e) {
+//        getExGyms();
+//    })
     getWeather();
     getScanAreaCoords();
     if (_DisplaySpawnpointsLayer === 'True') {
@@ -1368,7 +1408,7 @@ map.whenReady(function () {
         getWorkers();
     }
     setInterval(getPokemon, 30000);
-    setInterval(getGyms, 45000)
+    setInterval(getGyms, 60000)
     setInterval(getRaids, 60000);
     setInterval(getWeather, 300000);
     
@@ -1446,6 +1486,8 @@ function onOverLayAdd(e) {
         hide_button.removeClass("active")
         display_button.addClass("active");
         setPreference("EX_ELIGIBLE_LAYER",'display');
+        getExGyms();
+        getExRaids();
     }
 
     if (e.name == 'Weather') {
@@ -2797,13 +2839,13 @@ if ( getPreference("PARKS_IN_S2_CELLS_LAYER") === "display" ) {
 } else {
     map.removeLayer(overlays.Parks_In_S2_Cells);
 }
-
+/* TEMPORARILY REMOVE UNTIL INACCESSIBLE MARKERS IS RESOLVED
 if ( getPreference("EX_ELIGIBLE_LAYER") === "display" ) {
     map.addLayer(overlays.EX_Gyms);
 } else {
     map.removeLayer(overlays.EX_Gyms);
 }
-
+*/
 if ( getPreference("WEATHER_LAYER") === "display" ) {
     map.addLayer(overlays.Weather);
 } else {
