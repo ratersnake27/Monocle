@@ -348,7 +348,7 @@ function getPopupContent (item) {
         content += '<img id="type" class="type-' + pokemon_name_type[item.pokemon_id][3] + '" src="static/img/blank_1x1.png">';
     }
     content += '</div>';
-
+console.log("class= weather_" + weather[item.pokemon_s2_cell_id].condition + "_" + day[weather[item.pokemon_s2_cell_id].day]);
     if ( item.boost != "normal" ) {
         content += '<div class="boosted_popup"><img id="weather" class="weather_' + weather[item.pokemon_s2_cell_id].condition + '_' + day[weather[item.pokemon_s2_cell_id].day] + '" src="static/img/blank_1x1.png"><div class="boosted_popup_text"><b>Boosted</b></div></div>';
     }
