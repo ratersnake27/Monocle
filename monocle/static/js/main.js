@@ -335,6 +335,7 @@ function getPopupContent (item) {
     var expires_at = minutes + 'm ' + seconds + 's';
     var expires_time = convertToTwelveHourTime(item.expires_at);
     var form = getForm(item.form);
+    var boost_status = getBoostStatus(item);
     var day = ['none','day','night'];
     if (item.form > 0) {
        var pokemon_name = item.name + ' - ' + form;
@@ -351,7 +352,7 @@ function getPopupContent (item) {
     }
     content += '</div>';
 
-    if ( item.boost != "normal" ) {
+    if ( boost_status != "normal" ) {
         content += '<div class="boosted_popup"><img id="weather" class="weather_' + weather[item.pokemon_s2_cell_id].condition + '_' + day[weather[item.pokemon_s2_cell_id].day] + '" src="static/img/blank_1x1.png"><div class="boosted_popup_text"><b>Boosted</b></div></div>';
     }
   
@@ -1383,26 +1384,30 @@ if(parseFloat(params.lat) && parseFloat(params.lon)){
     map.getPane('at_shadow').style.zIndex = 500;
 
 } else {
-// TEST THIS
-//    if ( ( localStorage.getItem(_PoGoSDRegion+"lastZoom") == null ) || ( localStorage.getItem(_PoGoSDRegion+"lastCenterLat") == null ) || ( localStorage.getItem(_PoGoSDRegion+"lastCenterLng") == null ) ) {
+    if ( ( localStorage.getItem(_PoGoSDRegion+"lastZoom") === null ) || ( localStorage.getItem(_PoGoSDRegion+"lastCenterLat") === null ) || ( localStorage.getItem(_PoGoSDRegion+"lastCenterLng") === null ) ) {
         var map = L.map('main-map', {
                     preferCanvas: true,
                     maxZoom: 18,}).setView(_MapCoords, 16);
-  
+
         map.createPane('sub_shadow');
         map.createPane('at_shadow');
         map.getPane('sub_shadow').style.zIndex = 450;
         map.getPane('at_shadow').style.zIndex = 500;
-/*    } else {
-        var coords = localStorage.getItem(_PoGoSDRegion+"lastCenter");
+    } else {
+        var coords = [parseFloat(localStorage.getItem(_PoGoSDRegion+"lastCenterLat")),parseFloat(localStorage.getItem(_PoGoSDRegion+"lastCenterLng"))];
         var map = L.map('main-map', {
                     preferCanvas: true,
-                    maxZoom: 18,}).setView([localStorage.getItem(_PoGoSDRegion+"lastCenterLat"), localStorage.getItem(_PoGoSDRegion+"lastCenterLng")], localStorage.getItem(_PoGoSDRegion+"lastZoom"));
-      
-        localStorage.setItem(_PoGoSDRegion+"lastZoom", null);
-        localStorage.setItem(_PoGoSDRegion+"lastCenterLat", null);
-        localStorage.setItem(_PoGoSDRegion+"lastCenterLng", null);
-    } */
+                    maxZoom: 18,}).setView(coords, parseInt(localStorage.getItem(_PoGoSDRegion+"lastZoom")));
+ 
+        map.createPane('sub_shadow');
+        map.createPane('at_shadow');
+        map.getPane('sub_shadow').style.zIndex = 450;
+        map.getPane('at_shadow').style.zIndex = 500;
+ 
+        localStorage.removeItem(_PoGoSDRegion+"lastZoom");
+        localStorage.removeItem(_PoGoSDRegion+"lastCenterLat");
+        localStorage.removeItem(_PoGoSDRegion+"lastCenterLng");
+    }
 }
 
 if (_DisplayPokemonLayer === 'True') {
@@ -1442,11 +1447,6 @@ map.whenReady(function () {
         map.setZoom(currentZoom);
         map.on('locationfound', onLocationFound);
         $('.hide-marker').show(); //Show hide My Location marker
-        
-        var currentCenter = map.getCenter();
-        localStorage.setItem(_PoGoSDRegion+"lastZoom", currentZoom);
-        localStorage.setItem(_PoGoSDRegion+"lastCenterLat", currentCenter.lat);
-        localStorage.setItem(_PoGoSDRegion+"lastCenterLng", currentCenter.lng);
     });
 
     getPokemon();
@@ -1468,7 +1468,8 @@ map.whenReady(function () {
     setInterval(getPokemon, 30000);
     setInterval(getGyms, 60000)
     setInterval(getRaids, 60000);
-    setInterval(getWeather, 300000);
+//    setInterval(getWeather, 300000); //DEBUG
+    setInterval(getWeather, 30000); //DEBUG
     
     if (_DisplaySpawnpointsLayer === 'True') {
         setInterval(getSpawnPoints, 30000);
@@ -1719,6 +1720,9 @@ $('.hide-marker').on('click', function(){
     // Button action to hide My Location marker
     map.removeLayer(_LocationMarker);
     $(this).hide();
+    localStorage.removeItem(_PoGoSDRegion+"lastZoom");
+    localStorage.removeItem(_PoGoSDRegion+"lastCenterLat");
+    localStorage.removeItem(_PoGoSDRegion+"lastCenterLng");
 });
 
 $('.my-settings').on('click', function () {
@@ -3118,6 +3122,11 @@ function onLocationFound(e) {
                 _LocationMarker.setIcon(ultraIconSmall);
             }
     });
+
+    var currentCenter = map.getCenter();
+    localStorage.setItem(_PoGoSDRegion+"lastZoom", currentZoom);
+    localStorage.setItem(_PoGoSDRegion+"lastCenterLat", currentCenter.lat);
+    localStorage.setItem(_PoGoSDRegion+"lastCenterLng", currentCenter.lng);
 }
 
 // Really? Copying this too?
