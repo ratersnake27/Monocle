@@ -334,6 +334,7 @@ function getPopupContent (item) {
     var expires_time = convertToTwelveHourTime(item.expires_at);
     var form = getForm(item.form);
     var day = ['none','day','night'];
+    var boost_status = getBoostStatus(item);
     if (item.form > 0) {
        var pokemon_name = item.name + ' - ' + form;
     } else {
@@ -348,8 +349,8 @@ function getPopupContent (item) {
         content += '<img id="type" class="type-' + pokemon_name_type[item.pokemon_id][3] + '" src="static/img/blank_1x1.png">';
     }
     content += '</div>';
-console.log("class= weather_" + weather[item.pokemon_s2_cell_id].condition + "_" + day[weather[item.pokemon_s2_cell_id].day]);
-    if ( item.boost != "normal" ) {
+
+    if ( boost_status != "normal" ) {
         content += '<div class="boosted_popup"><img id="weather" class="weather_' + weather[item.pokemon_s2_cell_id].condition + '_' + day[weather[item.pokemon_s2_cell_id].day] + '" src="static/img/blank_1x1.png"><div class="boosted_popup_text"><b>Boosted</b></div></div>';
     }
   
@@ -605,7 +606,7 @@ function PokemonMarker (raw) {
     }
   
     boostedPokemonDisplay();
-  
+
     // I know you stole this stuff from me
     var unown_letter = getForm(raw.form);
     var boost_status = getBoostStatus(raw);
@@ -1014,13 +1015,26 @@ function addPokestopsToMap (data, map) {
     });
 }
 
+function Cell(id, coords, center, condition, alert_severity, warn, day, s2_cell_id, updated) {
+    this.id = id;
+    this.coords = coords;
+    this.center = center;
+    this.condition = condition;
+    this.alert_severity = alert_severity;
+    this.warn = warn;
+    this.day = day;
+    this.s2_cell_id = s2_cell_id;
+    this.updated = updated;
+}
+
 function addWeatherToMap (data, map) {
     overlays.Weather.clearLayers();
     data.forEach(function (item) {
         var color = 'grey';
         var conditions = ['Extreme', 'Clear', 'Rainy', 'Partly Cloudy', 'Overcast', 'Windy', 'Snow', 'Fog'];
-        
-        weather[item.s2_cell_id] = item;
+        var weather_cell = new Cell(item.id, item.coords, item.center, item.condition, item.alert_severity, item.warn, item.day, item.s2_cell_id, item.updated);
+ 
+        weather[item.s2_cell_id] = weather_cell;
 
         if ( localStorage.getItem(item.id) === null ) {
             localStorage.setItem(item.id, item.updated); // Save initial last update to local storage
@@ -1412,13 +1426,14 @@ map.whenReady(function () {
         localStorage.setItem(_PoGoSDRegion+"lastCenterLng", currentCenter.lng);
     });
 
+    getWeather();
     getPokemon();
     getGyms();
     getRaids();
     getCells();
     getParks();
     getExGyms();
-    getWeather();
+
     getScanAreaCoords();
     if (_DisplaySpawnpointsLayer === 'True') {
         getSpawnPoints();
@@ -3118,7 +3133,7 @@ function checkBoost(boost_status) {
 
 function getBoostStatus(pokemon) {
     var boost = 'normal';
-
+  
     if ( weather[pokemon.pokemon_s2_cell_id].condition == 0 ) {
         return;
     } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 1 ) {
