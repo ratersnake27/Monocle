@@ -1183,7 +1183,7 @@ function addExGymsToMap (data, map) {
         if (item.id in ex_markers) {
             return;
         }
-        marker = ExGymMarker(item); // CREATE NEW MARKER FOR EX ELIGIBLES
+        var marker = ExGymMarker(item); // CREATE NEW MARKER FOR EX ELIGIBLES
         marker.addTo(overlays.EX_Gyms);
     });
 }
@@ -1204,7 +1204,7 @@ function addExRaidsToMap (data, map) {
             // If marker already exists don't do anything
             if (ex_item.id in ex_markers) {
             } else {
-                ex_marker = ExRaidMarker(ex_item); // CREATE NEW MARKER FOR EX ELIGIBLES
+                var ex_marker = ExRaidMarker(ex_item); // CREATE NEW MARKER FOR EX ELIGIBLES
                 ex_marker.addTo(overlays.EX_Gyms);
             }
         }
@@ -1450,6 +1450,7 @@ map.whenReady(function () {
     });
 
     getWeather();
+    getExGyms();
     getPokemon();
     getGyms();
     getRaids();
@@ -1457,9 +1458,6 @@ map.whenReady(function () {
         getCells();
         getParks();
     })
-//    overlays.EX_Gyms.once('add', function(e) {
-//        getExGyms();
-//    })
     
     getScanAreaCoords();
     if (_DisplaySpawnpointsLayer === 'True') {
@@ -1469,8 +1467,7 @@ map.whenReady(function () {
     setInterval(getPokemon, 30000);
     setInterval(getGyms, 60000)
     setInterval(getRaids, 60000);
-//    setInterval(getWeather, 300000); //DEBUG
-    setInterval(getWeather, 30000); //DEBUG
+    setInterval(getWeather, 300000);
     
     if (_DisplaySpawnpointsLayer === 'True') {
         setInterval(getSpawnPoints, 30000);
@@ -2940,13 +2937,13 @@ if ( getPreference("PARKS_IN_S2_CELLS_LAYER") === "display" ) {
 } else {
     map.removeLayer(overlays.Parks_In_S2_Cells);
 }
-/* TEMPORARILY REMOVE UNTIL INACCESSIBLE MARKERS IS RESOLVED
+
 if ( getPreference("EX_ELIGIBLE_LAYER") === "display" ) {
     map.addLayer(overlays.EX_Gyms);
 } else {
     map.removeLayer(overlays.EX_Gyms);
 }
-*/
+
 if ( getPreference("WEATHER_LAYER") === "display" ) {
     map.addLayer(overlays.Weather);
 } else {
