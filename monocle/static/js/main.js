@@ -1449,6 +1449,7 @@ map.whenReady(function () {
         $('.hide-marker').show(); //Show hide My Location marker
     });
 
+    getWeather();
     getPokemon();
     getGyms();
     getRaids();
@@ -1459,7 +1460,7 @@ map.whenReady(function () {
 //    overlays.EX_Gyms.once('add', function(e) {
 //        getExGyms();
 //    })
-    getWeather();
+    
     getScanAreaCoords();
     if (_DisplaySpawnpointsLayer === 'True') {
         getSpawnPoints();
