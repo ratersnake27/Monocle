@@ -328,14 +328,13 @@ if (_DisplaySpawnpointsLayer === 'True') {
     monitor(overlays.Workers, false)
 }
 
-function getPopupContent (item) {
+function getPopupContent (item, boost_status) {
     var diff = (item.expires_at - new Date().getTime() / 1000);
     var minutes = parseInt(diff / 60);
     var seconds = parseInt(diff - (minutes * 60));
     var expires_at = minutes + 'm ' + seconds + 's';
     var expires_time = convertToTwelveHourTime(item.expires_at);
     var form = getForm(item.form);
-    var boost_status = getBoostStatus(item);
     var day = ['none','day','night'];
     if (item.form > 0) {
        var pokemon_name = item.name + ' - ' + form;
@@ -648,9 +647,9 @@ function PokemonMarker (raw) {
     markers[raw.id] = marker;
     marker.on('popupopen',function popupopen (event) {
         event.popup.options.autoPan = true; // Pan into view once
-        event.popup.setContent(getPopupContent(event.target.raw));
+        event.popup.setContent(getPopupContent(event.target.raw, boost_status));
         event.target.popupInterval = setInterval(function () {
-            event.popup.setContent(getPopupContent(event.target.raw));
+            event.popup.setContent(getPopupContent(event.target.raw, boost_status));
             event.popup.options.autoPan = false; // Don't fight user panning
         }, 1000);
     });
@@ -831,7 +830,7 @@ function ExRaidMarker (raw) {
         var content = ''
         content += '<div class="ex_gym_popup">';
         content += 'The raid at the';
-        content += '<br><b>' + raw.gym_name + ' Gym</b><br>';
+        content += '<br><b>' + raw.name + ' Gym</b><br>';
         content += 'has been idenified as being an <br>EX Raid Eligible Raid';
         content += '<br><br><a href="#" data-action="display" class="ex_raid_popup_show_raids">Show Current Raids</a>';
         content += '&nbsp; | &nbsp;';
@@ -980,7 +979,7 @@ function addRaidsToMap (data, map) {
             {
                 ex_item.id = 'ex-raid-' + item.fort_id;
                 ex_item.fort_id = item.fort_id;
-                ex_item.gym_name = item.name;
+                ex_item.name = item.gym_name;
                 ex_item.lat = item.lat;
                 ex_item.lon = item.lon;
                 
@@ -1192,12 +1191,11 @@ function addExRaidsToMap (data, map) {
     data.forEach(function (item) {
         var raid_id = 'raid-' + item.fort_id;
         var ex_item = {};
-
         if (markers[raid_id])
         {
             ex_item.id = 'ex-raid-' + item.fort_id;
             ex_item.fort_id = item.fort_id;
-            ex_item.gym_name = item.name;
+            ex_item.name = item.name;
             ex_item.lat = item.lat;
             ex_item.lon = item.lon;
             
@@ -3168,60 +3166,60 @@ function checkBoost(boost_status) {
 
 function getBoostStatus(pokemon) {
     var boost = 'normal';
-
-    if ( weather[pokemon.pokemon_s2_cell_id].condition == 0 ) {
-        return;
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 1 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'grass' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'grass' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fire' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fire' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ground' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ground' ) ){
-            boost = 'boosted';
-        }
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 2 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'water' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'water' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'electric' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'electric' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'bug' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'bug' ) ) {
-            boost = 'boosted';
-        }
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 3 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'normal' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'normal' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'rock' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'rock' ) ) {
-            boost = 'boosted';
-        }
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 4 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fairy' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fairy' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fighting' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fighing' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'poison' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'poison' ) ) {
-            boost = 'boosted';
-        }
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 5 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'flying' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'flying' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'dragon' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'dragon' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'psychic' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'psychic' ) ) {
-            boost = 'boosted';
-        }
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 6 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ice' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ice' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'steel' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'steel' ) ) {
-            boost = 'boosted';
-        }
-    } else if ( weather[pokemon.pokemon_s2_cell_id].condition == 7 ) {
-        if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'dark' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'dark' ) ) {
-            boost = 'boosted';
-        } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ghost' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ghost' ) ) {
-            boost = 'boosted';
-        }
+  
+    switch (weather[pokemon.pokemon_s2_cell_id].condition) {
+        case 0:
+            boost = 'normal';
+        case 1:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'grass' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'grass' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fire' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fire' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ground' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ground' ) ){
+                boost = 'boosted';
+            }
+        case 2:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'water' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'water' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'electric' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'electric' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'bug' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'bug' ) ) {
+                boost = 'boosted';
+            }
+        case 3:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'normal' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'normal' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'rock' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'rock' ) ) {
+                boost = 'boosted';
+            }
+        case 4:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fairy' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fairy' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fighting' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fighing' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'poison' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'poison' ) ) {
+                boost = 'boosted';
+            }
+        case 5:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'flying' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'flying' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'dragon' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'dragon' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'psychic' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'psychic' ) ) {
+                boost = 'boosted';
+            }
+        case 6:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ice' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ice' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'steel' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'steel' ) ) {
+                boost = 'boosted';
+            }
+        case 7:
+            if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'dark' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'dark' ) ) {
+                boost = 'boosted';
+            } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ghost' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ghost' ) ) {
+                boost = 'boosted';
+            }
     }
-
     return boost;
 }
