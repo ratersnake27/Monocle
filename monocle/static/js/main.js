@@ -3170,6 +3170,7 @@ function getBoostStatus(pokemon) {
     switch (weather[pokemon.pokemon_s2_cell_id].condition) {
         case 0:
             boost = 'normal';
+            break;
         case 1:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'grass' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'grass' ) ) {
                 boost = 'boosted';
@@ -3178,6 +3179,7 @@ function getBoostStatus(pokemon) {
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ground' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ground' ) ){
                 boost = 'boosted';
             }
+            break;
         case 2:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'water' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'water' ) ) {
                 boost = 'boosted';
@@ -3186,12 +3188,14 @@ function getBoostStatus(pokemon) {
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'bug' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'bug' ) ) {
                 boost = 'boosted';
             }
+            break;
         case 3:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'normal' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'normal' ) ) {
                 boost = 'boosted';
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'rock' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'rock' ) ) {
                 boost = 'boosted';
             }
+            break;
         case 4:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'fairy' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'fairy' ) ) {
                 boost = 'boosted';
@@ -3200,6 +3204,7 @@ function getBoostStatus(pokemon) {
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'poison' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'poison' ) ) {
                 boost = 'boosted';
             }
+            break;
         case 5:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'flying' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'flying' ) ) {
                 boost = 'boosted';
@@ -3208,18 +3213,23 @@ function getBoostStatus(pokemon) {
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'psychic' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'psychic' ) ) {
                 boost = 'boosted';
             }
+            break;
         case 6:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ice' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ice' ) ) {
                 boost = 'boosted';
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'steel' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'steel' ) ) {
                 boost = 'boosted';
             }
+            break;
         case 7:
             if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'dark' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'dark' ) ) {
                 boost = 'boosted';
             } else if ( ( pokemon_name_type[pokemon.pokemon_id][2] == 'ghost' ) || ( pokemon_name_type[pokemon.pokemon_id][3] == 'ghost' ) ) {
                 boost = 'boosted';
             }
+            break;
+        default:
+            boost = 'normal';
     }
     return boost;
 }
