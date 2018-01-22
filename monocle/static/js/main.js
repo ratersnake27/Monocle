@@ -388,7 +388,7 @@ function getPopupContent (item, boost_status) {
     content += '</div>';
 
     if ( boost_status != "normal" ) {
-        content += '<div class="boosted_popup"><img id="weather" class="weather_' + weather[item.pokemon_s2_cell_id].condition + '_' + day[weather[item.pokemon_s2_cell_id].day] + '" src="static/img/blank_1x1.png"><div class="boosted_popup_text"><b>Boosted</b></div></div>';
+        content += '<div class="boosted_popup"><img id="weather" class="weather_' + weather[parseInt(item.pokemon_s2_cell_id)].condition + '_' + day[weather[parseInt(item.pokemon_s2_cell_id)].day] + '" src="static/img/blank_1x1.png"><div class="boosted_popup_text"><b>Boosted</b></div></div>';
     }
   
     content += '<div class="pokemon_popup_text">';
@@ -649,7 +649,12 @@ function PokemonMarker (raw) {
   
     // I know you stole this stuff from me
     var unown_letter = getForm(raw.form);
-    var boost_status = getBoostStatus(raw);
+    // Don't call boost status function if 0
+    if ( ( raw.pokemon_s2_cell_id === 0 ) || ( raw.pokemon_s2_cell_id === null ) ) {
+        var boost_status = 'normal'
+    } else {
+	 var boost_status = getBoostStatus(raw);
+    }
     var icon = new PokemonIcon({iconID: raw.pokemon_id, iv: totaliv, form: unown_letter, expires_at: raw.expires_at, boost_status: boost_status});
     var marker = L.marker([raw.lat, raw.lon], {icon: icon, opacity: 1});
     var intId = parseInt(raw.id.split('-')[1]);
@@ -3084,7 +3089,7 @@ function checkBoost(boost_status) {
 function getBoostStatus(pokemon) {
     var boost = 'normal';
   
-    switch (weather[pokemon.pokemon_s2_cell_id].condition) {
+    switch (weather[parseInt(pokemon.pokemon_s2_cell_id)].condition) {
         case 0:
             boost = 'normal';
             break;

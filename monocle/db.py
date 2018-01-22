@@ -372,7 +372,8 @@ class Sighting(Base):
     move_2 = Column(SmallInteger)
     cp = Column(SmallInteger)
     form = Column(SmallInteger)
-
+    s2_cell_id = Column(String(20))
+    
     __table_args__ = (
         UniqueConstraint(
             'encounter_id',
@@ -402,6 +403,7 @@ class Mystery(Base):
     move_2 = Column(SmallInteger)
     cp = Column(SmallInteger)
     form = Column(SmallInteger)
+    s2_cell_id = Column(String(20))
 
     __table_args__ = (
         UniqueConstraint(
@@ -551,7 +553,8 @@ def add_sighting(session, pokemon):
         move_1=pokemon.get('move_1'),
         move_2=pokemon.get('move_2'),
         cp=pokemon.get('cp'),
-        form=pokemon.get('form', 0)
+        form=pokemon.get('form', 0),
+        s2_cell_id=pokemon['s2_cell_id']
     )
     session.add(obj)
     SIGHTING_CACHE.add(pokemon)

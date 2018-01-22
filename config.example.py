@@ -424,6 +424,9 @@ SHOW_SCAN_AREA_BY_DEFAULT = True
 SHOW_FILTERED_POKEMON_BY_DEFAULT = False
 SHOW_SPAWNPOINTS_BY_DEFAULT = False ## This shows both spawnpoints and workers
 
+# Display boosted pokemon.  Default is True.  Setting False may improve load speed.
+DISPLAY_BOOSTED_FEATURE = True
+
 ## Switch scan to Gym Scan Only Mode. This requires a modification to your database copying your gym points into a separate table and treating them as spawnpoints for workers to visit. Utilizes a minimal amount of workers to perform gym and raid scans.
 ## For mysql, utilize this query: CREATE TABLE gympoints SELECT * FROM spawnpoints; TRUNCATE gympoints; ALTER TABLE gympoints ADD PRIMARY KEY (id); ALTER TABLE gympoints MODIFY COLUMN id int(11) NOT NULL AUTO_INCREMENT; INSERT INTO gympoints (spawn_id, lat, lon) SELECT id, lat, lon FROM forts; UPDATE gympoints SET despawn_time = FLOOR(1 + RAND() * (3600 - 1)); UPDATE gympoints SET spawn_id = FLOOR(8854000000000 + RAND() * (8855000000000 - 8854000000000));
 GYM_POINTS = False;
