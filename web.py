@@ -160,6 +160,18 @@ def show_form_menu_item():
         show_form_menu_item += '<hr />'
     return Markup(show_form_menu_item)
 
+def display_boosted_feature():
+    display_boosted_feature = ''
+
+    if conf.DISPLAY_BOOSTED_FEATURE:
+        display_boosted_feature = '<hr />'
+        display_boosted_feature += '<h5>Highlight Boosted Pokemon</h5>'
+        display_boosted_feature += '<div class="btn-group" role="group" data-group="show_boosted_pokemon">'
+        display_boosted_feature +=  '<button type="button" class="btn btn-default" data-value="display">Display</button>'
+        display_boosted_feature +=  '<button type="button" class="btn btn-default" data-value="hide">Hide</button>'
+        display_boosted_feature +=  '</div>'
+    return Markup(display_boosted_feature)
+
 def render_map():
     css_js = ''
 
@@ -209,6 +221,7 @@ def render_map():
         display_scan_area=conf.SHOW_SCAN_AREA_BY_DEFAULT,
         display_filtered_pokemon=conf.SHOW_FILTERED_POKEMON_BY_DEFAULT,
         display_spawnpoints=conf.SHOW_SPAWNPOINTS_BY_DEFAULT,
+        display_boosted_feature=display_boosted_feature(),
         show_iv_menu_item=show_iv_menu_item(),
         show_form_menu_item=show_form_menu_item(),
         init_js_vars=js_vars,

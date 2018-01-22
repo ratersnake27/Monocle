@@ -91,7 +91,11 @@ def get_worker_markers(workers):
 
 def sighting_to_marker(pokemon, names=POKEMON, moves=MOVES, damage=DAMAGE, types=TYPES):
     pokemon_id = pokemon.pokemon_id
-    pokemon_s2_cell_id = s2sphere.CellId.from_lat_lng(s2sphere.LatLng.from_degrees(pokemon.lat,pokemon.lon)).parent(10)
+    if conf.DISPLAY_BOOSTED_FEATURE:
+        pokemon_s2_cell_id = s2sphere.CellId.from_lat_lng(s2sphere.LatLng.from_degrees(pokemon.lat,pokemon.lon)).parent(10)
+        s2_cell_id = pokemon_s2_cell_id.id()
+    else:
+        s2_cell_id = 0
 
     marker = {
         'id': 'pokemon-' + str(pokemon.id),
@@ -104,7 +108,7 @@ def sighting_to_marker(pokemon, names=POKEMON, moves=MOVES, damage=DAMAGE, types
         'form': pokemon.form,
         'type1': types[pokemon_id][1],
         'type2': types[pokemon_id][2],
-        'pokemon_s2_cell_id': pokemon_s2_cell_id.id()
+        'pokemon_s2_cell_id': s2_cell_id
     }
     move1 = pokemon.move_1
     if conf.MAP_SHOW_DETAILS and move1:

@@ -610,7 +610,14 @@ function PokemonMarker (raw) {
   
     // I know you stole this stuff from me
     var unown_letter = getForm(raw.form);
-    var boost_status = getBoostStatus(raw);
+  
+    // Don't call boost status function if 0
+    if ( raw.pokemon_s2_cell_id === 0 ) {
+        var boost_status = 'normal'
+    } else {
+        var boost_status = getBoostStatus(raw);
+    }
+  
     var icon = new PokemonIcon({iconID: raw.pokemon_id, iv: totaliv, form: unown_letter, expires_at: raw.expires_at, boost_status: boost_status});
     var marker = L.marker([raw.lat, raw.lon], {icon: icon, opacity: 1});
     var intId = parseInt(raw.id.split('-')[1]);
