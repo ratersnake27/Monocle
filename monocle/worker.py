@@ -1281,6 +1281,13 @@ class Worker:
         tsm = raw.last_modified_timestamp_ms
         tss = round(tsm / 1000)
         tth = raw.time_till_hidden_ms
+        
+        if conf.DISPLAY_BOOSTED_FEATURE:
+            pokemon_s2_cell_id = s2sphere.CellId.from_lat_lng(s2sphere.LatLng.from_degrees(raw.latitude,raw.longitude)).parent(10)
+            s2_cell_id = pokemon_s2_cell_id.id()
+        else:
+            s2_cell_id = 0
+        
         #Check form just for Unown 201
         if raw.pokemon_data.pokemon_id == 201 and raw.pokemon_data.pokemon_display.form > 0:
             unown_form = raw.pokemon_data.pokemon_display.form
@@ -1294,6 +1301,7 @@ class Worker:
             'lon': raw.longitude,
             'spawn_id': int(raw.spawn_point_id, 16) if spawn_int else raw.spawn_point_id,
             'form': unown_form,
+            's2_cell_id': s2_cell_id,
             'seen': tss
         }
         if tth > 0 and tth <= 90000:
