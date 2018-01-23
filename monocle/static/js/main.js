@@ -650,7 +650,7 @@ function PokemonMarker (raw) {
     // I know you stole this stuff from me
     var unown_letter = getForm(raw.form);
     // Don't call boost status function if 0
-    if ( ( raw.pokemon_s2_cell_id === 0 ) || ( raw.pokemon_s2_cell_id === null ) ) {
+    if ( ( parseInt(raw.pokemon_s2_cell_id) === 0 ) || ( raw.pokemon_s2_cell_id === null ) ) {
         var boost_status = 'normal'
     } else {
 	 var boost_status = getBoostStatus(raw);
