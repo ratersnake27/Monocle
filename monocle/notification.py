@@ -774,9 +774,11 @@ class Notifier:
                 "longitude": pokemon['lon'],
                 "disappear_time": ts,
                 "time_until_hidden_ms": tth * 1000
+                "s2_cell_id": pokemon['s2_cell_id'],
+                "form": pokemon['form']
             }
         }
-        try:
+        try: # THIS MAY NEED TO BE MOVED UP DUE TO A CHANGE IN DISCORD
             data['message']['individual_attack'] = pokemon['individual_attack']
             data['message']['individual_defense'] = pokemon['individual_defense']
             data['message']['individual_stamina'] = pokemon['individual_stamina']
