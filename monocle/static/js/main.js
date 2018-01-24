@@ -378,7 +378,9 @@ function getPopupContent (item, boost_status) {
        var pokemon_name = item.name;
     }
 
-    var content = '<div class="pokemon_popup_name"><b>' + pokemon_name + '</b> - <a href="https://pokemongo.gamepress.gg/pokemon/' + item.pokemon_id + '" target="_blank">#' + item.pokemon_id + '</a></div>';
+    var content = '<div class="pokemon_popup">';
+  
+    content += '<div class="pokemon_popup_name"><b>' + pokemon_name + '</b> - <a href="https://pokemongo.gamepress.gg/pokemon/' + item.pokemon_id + '" target="_blank">#' + item.pokemon_id + '</a></div>';
 
     content += '<div class="pokemon_popup_icons"><img id="type" class="type-' + pokemon_name_type[item.pokemon_id][2] + '" src="static/img/blank_1x1.png">';
 
@@ -395,12 +397,12 @@ function getPopupContent (item, boost_status) {
     
     if(item.atk != undefined){
         var totaliv = 100 * (item.atk + item.def + item.sta) / 45;
-        content += ' - <b>' + totaliv.toFixed(2) + '%</b><br>';
+        content += 'IV: <b>' + totaliv.toFixed(2) + '%</b> (' + item.atk + '/' + item.def + '/' + item.sta + ')<br>';
+        content += 'CP: <b>' + item.cp + '</b><br>';
         content += 'Disappears in: ' + expires_at + '<br>';
         content += 'Available until: ' + expires_time + '<br>';
-        content += 'Quick Move: ' + item.move1 + ' ( ' + item.damage1 + ' dps )<br>';
-        content += 'Charge Move: ' + item.move2 + ' ( ' + item.damage2 + ' dps )<br>';
-        content += 'IV: ' + item.atk + ' atk, ' + item.def + ' def, ' + item.sta + ' sta<br>'
+		content += 'Quick: ' + item.move1 + ' ( ' + item.damage1 + ' dps )<br>';
+        content += 'Charge: ' + item.move2 + ' ( ' + item.damage2 + ' dps )<br>';
     } else {
         content += 'Disappears in: ' + expires_at + '<br>';
         content += 'Available until: ' + expires_time + '<br>';
@@ -415,6 +417,7 @@ function getPopupContent (item, boost_status) {
     content += '&nbsp; | &nbsp;';
     content += '<a href="https://www.google.com/maps/?daddr='+ item.lat + ','+ item.lon +'" target="_blank" title="See in Google Maps">Get directions</a>';
     content += '<br><button class="coords" type="button">Copy Coordinates</button> <input type="text" style= "width:100%" value="'+ item.lat + ','+ item.lon +'"/>';
+	content += '</div>';
 	content += '</div>';
     return content;
 }
@@ -655,7 +658,7 @@ function PokemonMarker (raw) {
     } else {
 	 var boost_status = getBoostStatus(raw);
     }
-    var icon = new PokemonIcon({iconID: raw.pokemon_id, iv: totaliv, form: unown_letter, expires_at: raw.expires_at, boost_status: boost_status});
+    var icon = new PokemonIcon({iconID: raw.pokemon_id, iv: totaliv, cp: raw.cp, form: unown_letter, expires_at: raw.expires_at, boost_status: boost_status});
     var marker = L.marker([raw.lat, raw.lon], {icon: icon, opacity: 1});
     var intId = parseInt(raw.id.split('-')[1]);
     if (_last_pokemon_id < intId){
